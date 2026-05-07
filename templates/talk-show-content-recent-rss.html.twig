@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss
+  version="2.0"
+  xml:lang="en-US"
+  xmlns:dc="http://purl.org/dc/elements/1.1/"
+  xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xmlns:content="http://purl.org/rss/1.0/modules/content/"
+  xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>{{ row.title|raw }}</title>
+    <link>{{ row.link }}</link>
+    <description><![CDATA[{{ row.desc|raw }}]]></description>
+    <language>{{ row.language }}</language>
+    <copyright>{{ row.copyright|raw }}</copyright>
+    <managingEditor>{{ row.editor|raw }}</managingEditor>
+    <webMaster>{{ row.webmaster|raw }}</webMaster>
+    <pubDate>{{ row.pub_date }}</pubDate>
+    <lastBuildDate>{{ row.up_date }}</lastBuildDate>
+    <generator>BBS Radio, BBS Network Inc.</generator>
+    {% if row.feed_image is not empty %}
+      <image>
+        <url>{{ row.feed_image }}</url>
+        <title>{{ row.title|raw }}</title>
+        <link>{{ row.link }}</link>
+      </image>
+    {% endif %}
+
+    <atom:link href="{{ row.atom_link }}" rel="self" type="application/rss+xml" />
+    {% if talkshows is iterable %}
+      {% for talkshow in talkshows %}
+      <item>
+        <title>{{ talkshow.title|raw }}</title>
+        <description><![CDATA[{{ talkshow.desc|raw }}]]></description>
+        <content:encoded><![CDATA[{{ talkshow.desc|raw }}]]></content:encoded>
+        {% if talkshow.pub_date is not empty %}
+          <pubDate>{{ talkshow.pub_date }}</pubDate>
+        {% endif %}
+        <guid isPermaLink="true">{{ talkshow.link }}</guid>
+        {% if talkshow.author is not empty %}
+          <author>{{ talkshow.author|raw }}</author>
+        {% endif %}
+        {% if talkshow.tags is not empty %}
+          {% for tag_name in talkshow.tags %}
+            <category>{{ tag_name|raw }}</category>
+          {% endfor %}
+        {% endif %}
+        {% if talkshow.link is not empty %}
+          <link>{{ talkshow.link }}</link>
+        {% endif %}
+      </item>
+      {% endfor %}
+    {% endif %}
+  </channel>
+</rss>

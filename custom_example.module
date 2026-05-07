@@ -1,0 +1,108 @@
+<?php
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Markup;
+use Drupal\Core\Url;
+use Drupal\node\Entity\Node;
+use Drupal\Core\Database\Query\AlterableInterface;
+
+/**
+ * Implements hook_theme().
+ *
+ * Defines the theming capabilities provided by this module.
+ */
+function custom_example_theme($existing, $type, $theme, $path) {
+  $theme = [
+    'talk_show_content_rss' => [
+      'variables' => [
+        'row' => NULL,
+        'archives' => NULL,
+      ],
+    ],
+    'talk_show_content_recent_rss' => [
+      'variables' => [
+        'row' => NULL,
+        'talkshows' => NULL,
+      ],
+    ],
+    'talk_show_content_mrss' => [
+      'variables' => [
+        'row' => NULL,
+        'archives' => NULL,
+      ],
+    ],
+
+  return $theme;
+}
+
+
+
+/**
+ * Get Username by uid
+**/
+function geGuestnameByid($nid) {
+  $result1='';
+
+  if (!empty($nid)) {
+    $query = \Drupal::database()->select('node_field_data', 'n');
+    $query->fields('n', array('title'));
+    $query->fields('fdfpgo', array('field_past_guest_occupation_value'));
+    $query->join('node__field_past_guest_occupation', 'fdfpgo', 'fdfpgo.entity_id=n.nid');
+    $query->condition('n.nid', $nid, "=");
+
+    $result = $query->execute()->fetchAll();
+
+    if (array_filter($result)) {
+      $correctTitle = str_replace("Guest, ", "", $result[0]->title);
+      $result1 = " - " . $correctTitle . " - " . $result[0]->field_past_guest_occupation_value;
+    }
+  }
+
+  return $result1;
+}
+
+function geGuestPastHistory($nid) {
+  $result2 = '';
+
+  $query = \Drupal::database()->select('node__field_past_guest_category','fdfpgc');
+  $query->fields('fdfpgc', array('field_past_guest_category_target_id'));
+  $query->condition('fdfpgc.entity_id', $nid, "=");
+
+  $result = $query->execute()->fetchAll();
+  if(array_filter($result)) {
+    foreach ($result as $data) {
+      if (!empty($result2)) {
+        $result2 .= ", ";
+      }
+
+      $query1 = \Drupal::database()->select('taxonomy_term_field_data', 'ttd')
+        ->fields('ttd', array('name'));
+      $query1->condition('ttd.tid', $data->field_past_guest_category_target_id, '=');
+
+      $result1 = $query1->execute()->fetchField();
+      $result2 .= $result1;
+    }
+  }
+
+  return $result2;
+}
+
+/**
+ * Implements hook_page_attachments().
+ */
+function custom_example_page_attachments(array &$page) {
+  $site_url = \Drupal::request()->getSchemeAndHttpHost();
+
+  $rss = [
+    '#type' => 'html_tag',
+    '#tag' => 'link',
+    '#attributes' => [
+      'hreflang' => 'en',
+      'type' => 'application/rss+xml',
+      'rel' => 'alternate',
+      'href' => $site_url . '/customshow/rss',
+      'title' => 'Subscribe to BBSRadio Talkshows'
+    ],
+  ];
+  $page['#attached']['html_head'][] = [$rss, 'talkshow-rss'];
+}

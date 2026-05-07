@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/" xml:lang='en-US' xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+    <title>{{ row.title|raw }}</title>
+    <link>{{ row.link }}</link>
+    <description><![CDATA[{{ row.desc|raw }}]]></description>
+    {% if row.image is not empty %}
+	  <image>
+	    <url>{{ row.image.url }}</url>
+        <title>{{ row.title|raw }}</title>
+	    <link>{{ row.link }}</link>
+	  </image>
+    {% endif %}
+    <copyright>{{ row.copyright|raw }}</copyright>
+    <language>{{ row.language }}</language>
+    <managingEditor>{{ row.editor|raw }}</managingEditor>
+    <webMaster>{{ row.webmaster|raw }}</webMaster>
+    <pubDate>{{ row.pub_date|raw }}</pubDate>
+    <lastBuildDate>{{ row.up_date }}</lastBuildDate>
+    <generator>BBS Radio, BBS Network Inc.</generator>
+    {% if row.categories is iterable %}
+      {% for category in row.categories %}
+        <category>{{ category.name|raw }}</category>
+        {% if category.children is not empty %}
+          {% if category.children is iterable %}
+            {% for subcategory in category.children %}
+              <category>{{ subcategory.name|raw }}</category>
+            {% endfor %}
+          {% endif %}
+        {% else %}
+          <category>{{ category.name|raw }}</category>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+    <atom:link href="{{ row.atom_link }}" rel="self" type="application/rss+xml" />
+    {% if archives is iterable %}
+      {% for archive in archives %}
+	    <item>
+	      <title>{{ archive.title|raw }}</title>
+	      <link>{{ archive.link }}</link>
+	      <description><![CDATA[{{ archive.desc|raw }}]]></description>
+	      {% if archive.pub_date is not empty %}
+          <pubDate>{{ archive.pub_date }}</pubDate>
+        {% endif %}
+        <guid isPermaLink="true">{{ archive.link }}</guid>
+        {% if archive.author is not empty %}
+          <author>{{ archive.author|raw }}</author>
+        {% endif %}
+        {% if archive.tags is not empty %}
+          {% for tag_name in archive.tags %}
+            <category>{{ tag_name|raw }}</category>
+          {% endfor %}
+        {% endif %}
+        {% if archive.audios_videos | length > 0 %}
+          {% for r in archive.audios_videos %}
+            <media:content url="{{ r.video_url }}" {% if r.video_size %} fileSize="{{ r.video_size }}" {% endif %} {% if r.video_mime %} type="{{ r.video_mime }}" {% endif %} medium="{{ r.media_type }}" height="240" width="320" duration="120" isDefault="true">
+              <media:title>{{ r.video_title|raw }}</media:title>
+              <media:description><![CDATA[{{ r.video_desc|raw }}]]></media:description>
+              {% if r.video_thumb is not empty %}
+                <media:thumbnail url="{{ r.video_thumb }}" height="120" width="160"/>
+              {% endif %}
+              <media:player url="{{ r.video_player_url }}" height="{{ r.video_player_height }}" width="{{ r.video_player_width }}" />
+            </media:content>
+          {% endfor %}
+		    {% endif %}
+	    </item>
+      {% endfor %}
+    {% endif %}
+  </channel>
+</rss>

@@ -1,0 +1,60 @@
+# RSS and MRSS
+custom_example.rss_talkshow:
+  path: '/customshow/{node}'
+  defaults:
+    _controller:  '\Drupal\custom_example\Controller\TalkshowRssController::getRSS'
+    _title: 'Talkshow Information'
+    node: ''
+  requirements:
+    _permission: 'access content'
+  options:
+    no_cache: TRUE
+    parameters:
+      node:
+        type: entity:node
+
+custom_example.mrss_talkshow:
+  path: '/customshow/mrss/{node}'
+  defaults:
+    _controller:  '\Drupal\custom_example\Controller\TalkshowMrssController::getMRSS'
+    _title: 'Talkshow MRSS'
+    node: ''
+  requirements:
+    _permission: 'access content'
+  options:
+    no_cache: TRUE
+    parameters:
+      node:
+        type: entity:node
+
+custom_example.recent_talkshow:
+  path: '/customshow/rss'
+  defaults:
+    _controller:  '\Drupal\custom_example\Controller\TalkshowRssController::getRecentTalkshowRss'
+    _title: 'Recent Talkshows'
+    node: ''
+  requirements:
+    _permission: 'access content'
+  options:
+    no_cache: TRUE
+
+custom_example.file_proxy:
+  path: '/bbsradio/file-alias/{node}/{type}/{file_type}/{filename}'
+  defaults:
+    _controller: '\Drupal\custom_example\Controller\BaseController::processArchiveMediaUrl'
+    _title: 'File Url'
+    type: 0
+    file_type: 0
+    filename: ''
+  requirements:
+    _permission: 'access content'
+  options:
+    parameters:
+      node:
+        type: entity:node
+      type:
+        type: integer
+      file_type:
+        type: integer
+      filename:
+        type: string

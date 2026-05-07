@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss
+  version="2.0"
+  xml:lang="en-US"
+  xmlns:dc="http://purl.org/dc/elements/1.1/"
+  xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
+  xmlns:admin="http://webns.net/mvcb/"
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xmlns:content="http://purl.org/rss/1.0/modules/content/"
+  xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"
+  xmlns:media="http://search.yahoo.com/mrss/"
+  xmlns:atom="http://www.w3.org/2005/Atom"
+  xmlns:podcast="https://podcastindex.org/namespace/1.0">
+  <channel>
+    <title>{{ row.title }}</title>
+    <link>{{ row.link }}</link>
+    <description><![CDATA[{{ row.desc|raw }}]]></description>
+    <language>{{ row.language }}</language>
+    <copyright>{{ row.copyright|raw }}</copyright>
+    <managingEditor>{{ row.editor|raw }}</managingEditor>
+    <webMaster>{{ row.webmaster|raw }}</webMaster>
+    <pubDate>{{ row.pub_date }}</pubDate>
+    <lastBuildDate>{{ row.up_date }}</lastBuildDate>
+    <generator>BBS Radio, BBS Network Inc.</generator>
+
+    {% if row.image is not empty %}
+      <image>
+        <url>{{ row.image.url }}</url>
+        <title>{{ row.title|raw }}</title>
+        <link>{{ row.link }}</link>
+      </image>
+    {% endif %}
+
+    {% if row.feed_image is not empty %}
+      <itunes:image href="{{ row.feed_image }}" />
+    {% elseif row.image is not empty %}
+      <itunes:image href="{{ row.image.url }}"/>
+    {% endif %}
+
+    {# Required: no surrounding whitespace so it always renders #}
+    {% if row.explicit is not empty %}
+      <itunes:explicit>{{ row.explicit }}</itunes:explicit>
+    {% else %}
+      <itunes:explicit>false</itunes:explicit>
+    {% endif %}
+
+
+    {% if row.episodic is not empty %}
+      <itunes:type>{{ row.episodic }}</itunes:type>
+    {% endif %}
+
+    <itunes:owner>
+      <itunes:name>Douglas Newsom</itunes:name>
+      <itunes:email>doug@bbsradio.com</itunes:email>
+    </itunes:owner>
+
+    {% if row.itunes_subtitle is not empty %}
+      <itunes:subtitle><![CDATA[{{ row.itunes_subtitle|raw }}]]></itunes:subtitle>
+    {% endif %}
+
+    <itunes:author>BBS Radio, BBS Network Inc.</itunes:author>
+
+    {% if row.tag_list is not empty %}
+      <itunes:keywords>{{ row.tag_list|raw }}</itunes:keywords>
+    {% endif %}
+
+    {% if row.desc is not empty %}
+      <itunes:summary>{{ row.itunes_summary|raw }}</itunes:summary>
+    {% endif %}
+
+    {% if row.itunes_categories is iterable %}
+      {% for category in row.itunes_categories %}
+        <category>{{ category.name|raw }}</category>
+        {% if category.children is not empty and category.children is iterable %}
+          {% for subcategory in category.children %}
+            <category>{{ subcategory.name|raw }}</category>
+          {% endfor %}
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+
+    {% if row.itunes_categories is iterable %}
+      {% for itune_category in row.itunes_categories %}
+        {% if itune_category.children is not empty and itune_category.children is iterable %}
+          <itunes:category text="{{ itune_category.name|raw }}">
+            {% for itune_subcategory in itune_category.children %}
+              <itunes:category text="{{ itune_subcategory.name|raw }}" />
+            {% endfor %}
+          </itunes:category>
+        {% else %}
+          <itunes:category text="{{ itune_category.name|raw }}" />
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+
+    <atom:link href="{{ row.atom_link }}" rel="self" type="application/rss+xml" />
+
+    {# podcast:locked — default to "yes" to protect the feed; set row.podcast_locked = 'no' to allow moves #}
+    <podcast:locked>{{ 'yes' }}</podcast:locked>
+
+    {# podcast:guid — a stable UUID that uniquely identifies this podcast across directories #}
+    {% if row.podcast_guid is not empty %}
+      <podcast:guid>{{ row.podcast_guid }}</podcast:guid>
+    {% endif %}
+
+    {% if archives is iterable %}
+      {% for archive in archives %}
+      <item>
+        <title>{{ archive.title }}</title>
+        <itunes:title>{{ archive.itunes_title|raw }}</itunes:title>
+        <description><![CDATA[{{ archive.desc|raw }}]]></description>
+        <content:encoded><![CDATA[{{ archive.desc|raw }}]]></content:encoded>
+        <itunes:summary><![CDATA[{{ archive.itunes_summary|raw }}]]></itunes:summary>
+
+        {% if archive.pub_date is not empty %}
+          <pubDate>{{ archive.pub_date }}</pubDate>
+        {% endif %}
+
+        <guid isPermaLink="true">{{ archive.link }}</guid>
+
+        {% if archive.author is not empty %}
+          <author>{{ archive.author }}</author>
+          <itunes:author>{{ archive.author|raw }}</itunes:author>
+        {% endif %}
+
+        {% if archive.subtitle is not empty %}
+          <itunes:subtitle><![CDATA[{{ archive.itunes_subtitle|raw }}]]></itunes:subtitle>
+        {% endif %}
+
+        {% if archive.tag_list is not empty %}
+          <itunes:keywords>{{ archive.tag_list|raw }}</itunes:keywords>
+        {% endif %}
+
+        {# itunes:image — episode image falling back to channel image, no whitespace padding #}
+        <itunes:image href="{{ archive.archive_image }}" />
+
+        {# itunes:explicit per episode — inherit channel value if not set #}
+        <itunes:explicit>{{ archive.explicit is not empty ? archive.explicit : (row.explicit is not empty ? row.explicit : 'false') }}</itunes:explicit>
+
+        {% if archive.itunes_categories is iterable %}
+          {% for category in archive.itunes_categories %}
+            <category>{{ category.name|raw }}</category>
+            {% if category.children is not empty and category.children is iterable %}
+              {% for subcategory in category.children %}
+                <category>{{ subcategory.name|raw }}</category>
+              {% endfor %}
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+
+        {% if archive.itunes_categories is iterable %}
+          {% for itune_category in archive.itunes_categories %}
+            {% if itune_category.children is not empty and itune_category.children is iterable %}
+              <itunes:category text="{{ itune_category.name|raw }}">
+                {% for itune_subcategory in itune_category.children %}
+                  <itunes:category text="{{ itune_subcategory.name|raw }}" />
+                {% endfor %}
+              </itunes:category>
+            {% else %}
+              <itunes:category text="{{ itune_category.name|raw }}" />
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+
+        {% if archive.video_duration is not empty %}
+          <itunes:duration>{{ archive.video_duration }}</itunes:duration>
+        {% endif %}
+
+        {% if archive.link is not empty %}
+          <link>{{ archive.link }}</link>
+        {% endif %}
+
+        {% if archive.audios_videos | length > 0 %}
+          {% for r in archive.audios_videos %}
+            {% if r.video_url is not empty %}
+              <enclosure url="{{ r.video_url }}" length="{{ r.video_size }}" type="{{ r.video_mime }}" />
+            {% endif %}
+            <media:content url="{{ r.video_url }}" {% if r.video_size %} fileSize="{{ r.video_size }}" {% endif %} {% if r.video_mime %} type="{{ r.video_mime }}" {% endif %} medium="{{ r.media_type }}" height="240" width="320" duration="120" isDefault="true">
+              <media:title>{{ r.video_title|raw }}</media:title>
+              <media:description><![CDATA[{{ r.video_desc|raw }}]]></media:description>
+              {% if r.video_thumb is not empty %}
+                <media:thumbnail url="{{ r.video_thumb }}" height="120" width="160"/>
+              {% endif %}
+              <media:player url="{{ r.video_player_url }}" height="{{ r.video_player_height }}" width="{{ r.video_player_width }}" />
+            </media:content>
+          {% endfor %}
+        {% endif %}
+
+        {# Recommended: podcast:transcript per episode/enclosure #}
+        {% if archive.link is not empty %}
+          <podcast:transcript url="{{ archive.link }}" type="text/html" />
+        {% endif %}
+
+      </item>
+      {% endfor %}
+    {% endif %}
+  </channel>
+</rss>
